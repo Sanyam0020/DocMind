@@ -1,0 +1,16 @@
+if __name__ == "__main__":
+    file_path = Path("data/sample/test.txt")
+
+    print("File exists:", file_path.exists())
+    print("File path:", file_path.absolute())
+
+    text = read_document(file_path)
+
+    print("Text read from file:")
+    print(repr(text))
+
+    document = process_document(file_path)
+
+    print("Document:", document["filename"])
+    print("Extension:", document["extension"])
+    print("Word count:", document["word_count"])

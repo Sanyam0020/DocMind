@@ -1,0 +1,3 @@
+DocuMind is a document question answering system.
+
+It uses retrieval augmented generation to find relevant information from uploaded documents.
