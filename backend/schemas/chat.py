@@ -7,3 +7,11 @@ class Question(BaseModel):
 
 class Message(BaseModel):
     message: str
+
+
+class AnswerResponse(BaseModel):
+    received_question: str
+
+
+class EchoResponse(BaseModel):
+    echo: str
