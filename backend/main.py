@@ -23,7 +23,9 @@ def home():
 @app.get("/health")
 def health_check():
     return {
-        "status": "healthy"
+        "status": "healthy",
+        "service": "DocuMind API",
+        "version": "0.1.0"
     }
 
 
