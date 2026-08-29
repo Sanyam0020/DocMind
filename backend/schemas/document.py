@@ -1,6 +1,25 @@
 from pydantic import BaseModel
 
 
-class DocumentResponse(BaseModel):
-    status: str
-    characters: int
+class DocumentMetadata(BaseModel):
+    document_id: str
+    filename: str
+    extension: str
+    size_bytes: int
+
+
+class Page(BaseModel):
+    page_number: int
+    text: str
+
+
+class Chunk(BaseModel):
+    chunk_id: int
+    page_number: int
+    text: str
+
+
+class Document(BaseModel):
+    metadata: DocumentMetadata
+    pages: list[Page]
+    chunks: list[Chunk]
