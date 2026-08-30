@@ -39,9 +39,12 @@ def process_document(
             chunk_size=settings.chunk_size,
             overlap=settings.chunk_overlap,
             page_number=page.page_number,
-        )
+            document_id=document_id,
+    )
 
-        chunks.extend(page_chunks)
+    for chunk in page_chunks:
+        chunk["chunk_id"] = len(chunks) + 1
+        chunks.append(chunk)
 
     chunk_objects = [
         Chunk(**chunk)

@@ -23,7 +23,13 @@ print("Pages:", len(document.pages))
 print("Chunks:", len(document.chunks))
 
 for chunk in document.chunks:
+
     print()
+
+    print("Document ID:", chunk.document_id)
+
     print("Chunk ID:", chunk.chunk_id)
+
     print("Page:", chunk.page_number)
+
     print("Text:", chunk.text)

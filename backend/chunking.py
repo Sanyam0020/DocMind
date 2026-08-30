@@ -2,7 +2,8 @@ def create_chunks(
     text: str,
     chunk_size: int,
     overlap: int,
-    page_number: int
+    page_number: int,
+    document_id: str
 ) -> list[dict]:
 
     if chunk_size <= 0:
@@ -29,6 +30,7 @@ def create_chunks(
         chunk = " ".join(chunk_words)
 
         chunks.append({
+            "document_id": document_id,
             "chunk_id": len(chunks) + 1,
             "page_number": page_number,
             "text": chunk
@@ -48,8 +50,8 @@ if __name__ == "__main__":
         text=text,
         chunk_size=5,
         overlap=2,
-        page_number=1
+        page_number=1,
+        document_id="test-123"
     )
-
     for chunk in chunks:
         print(chunk)
