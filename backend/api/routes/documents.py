@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File, HTTPException
 
 from backend.schemas.document import DocumentResponse
 from backend.services.ingestion_service import process_document
@@ -14,19 +14,37 @@ def get_documents():
     }
 
 
-@router.post("/documents/process", response_model=DocumentResponse)
-def process_document_route(
-    document_id: str,
-    filename: str,
-    extension: str,
-    size_bytes: int,
-    text: str,
+@router.post("/documents/upload", response_model=DocumentResponse)
+async def upload_document(
+    file: UploadFile = File(...),
 ):
+    if not file.filename:
+        raise HTTPException(
+            status_code=400,
+            detail="Filename is required",
+        )
+
+    if not file.filename.lower().endswith(".txt"):
+        raise HTTPException(
+            status_code=400,
+            detail="Only .txt files are supported",
+        )
+
+    content = await file.read()
+
+    try:
+        text = content.decode("utf-8")
+    except UnicodeDecodeError:
+        raise HTTPException(
+            status_code=400,
+            detail="File must be UTF-8 encoded",
+        )
+
     document = process_document(
-        document_id=document_id,
-        filename=filename,
-        extension=extension,
-        size_bytes=size_bytes,
+        document_id=file.filename,
+        filename=file.filename,
+        extension=".txt",
+        size_bytes=len(content),
         text=text,
     )
 
@@ -35,4 +53,4 @@ def process_document_route(
         filename=document.metadata.filename,
         pages=len(document.pages),
         chunks=len(document.chunks),
-    )
+    )   

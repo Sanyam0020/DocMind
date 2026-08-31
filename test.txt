@@ -1,0 +1,1 @@
+DocuMind is a document question answering system. It uses retrieval augmented generation to answer questions. Documents are processed into smaller chunks. Machine learning allows computers to learn from data.
