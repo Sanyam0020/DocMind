@@ -1,3 +1,4 @@
+# pyrefly: ignore [missing-import]
 import faiss
 import numpy as np
 

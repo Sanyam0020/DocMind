@@ -7,6 +7,7 @@ from backend.schemas.document import (
 )
 from backend.core.config import settings
 from backend.services.embedding_service import embedding_service
+from backend.services.vector_store import vector_store
 
 
 def process_document(
@@ -59,6 +60,8 @@ def process_document(
                 embedding=embedding.tolist(),
             )
         )
+
+    vector_store.add(chunk_objects)
 
     return Document(
         metadata=metadata,
