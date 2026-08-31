@@ -12,12 +12,11 @@ class Page(BaseModel):
     page_number: int
     text: str
 
-
 class Chunk(BaseModel):
     chunk_id: int
     page_number: int
     text: str
-    embedding: list[float] | None = None
+    embedding: list[float]
 
 
 class Document(BaseModel):
