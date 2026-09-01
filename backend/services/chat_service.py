@@ -1,6 +1,7 @@
 from backend.core.config import settings
 from backend.services.embedding_service import embedding_service
 from backend.services.vector_store import vector_store
+from backend.services.llm_service import llm_service
 
 
 def answer_question(question: str) -> dict:
@@ -12,8 +13,19 @@ def answer_question(question: str) -> dict:
         top_k=settings.top_k,
     )
 
+    context = "\n\n".join(
+        result["chunk"].text
+        for result in results
+    )
+
+    answer = llm_service.generate(
+        question=question,
+        context=context,
+    )
+
     return {
         "received_question": question,
+        "answer": answer,
         "results": [
             {
                 "chunk_id": result["chunk"].chunk_id,

@@ -1,54 +1,48 @@
-from backend.schemas.document import Chunk
-from backend.services.embedding_service import embedding_service
-from backend.services.vector_store import vector_store
+from backend.services.ingestion_service import process_document
 from backend.services.chat_service import answer_question
 
 
-texts = [
-    "Machine learning allows computers to learn from data.",
-    "Supervised learning uses labelled training data.",
-    "The weather is sunny and warm today.",
-]
+document_text = """
+DocuMind is a document question answering system.
+It uses retrieval augmented generation to answer questions.
+Documents are processed into smaller chunks.
+
+Machine learning allows computers to learn from data.
+Supervised learning uses labelled training data.
+
+The weather is sunny and warm today.
+"""
 
 
-chunks = []
+print("Processing document...")
 
-for i, text in enumerate(texts):
-
-    embedding = embedding_service.embed_text(text)
-
-    chunks.append(
-        Chunk(
-            document_id="test-123",
-            chunk_id=i + 1,
-            page_number=1,
-            text=text,
-            embedding=embedding.tolist(),
-        )
-    )
-
-
-vector_store.add(chunks)
-
-
-result = answer_question(
-    "How do computers learn from data?"
+document = process_document(
+    document_id="test-chat-123",
+    filename="test.txt",
+    extension=".txt",
+    size_bytes=len(document_text.encode("utf-8")),
+    text=document_text,
 )
 
+print("Document processed.")
+print("Chunks stored:", len(document.chunks))
 
-print("Question:")
-print(result["received_question"])
 
-print()
+question = "How do computers learn from data?"
 
-print("Number of results:", len(result["results"]))
+print("\nQuestion:")
+print(question)
 
-print()
+response = answer_question(question)
 
-for item in result["results"]:
+print("\nAnswer:")
+print(response["answer"])
 
-    print("Chunk ID:", item["chunk_id"])
-    print("Page:", item["page_number"])
-    print("Score:", item["score"])
-    print("Text:", item["text"])
-    print()
+print("\nNumber of results:")
+print(len(response["results"]))
+
+for result in response["results"]:
+    print("\nChunk ID:", result["chunk_id"])
+    print("Page:", result["page_number"])
+    print("Score:", result["score"])
+    print("Text:", result["text"])

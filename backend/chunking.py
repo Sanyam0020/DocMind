@@ -3,7 +3,7 @@ def create_chunks(
     chunk_size: int,
     overlap: int,
     page_number: int,
-    document_id: str
+    document_id: str,
 ) -> list[dict]:
 
     if chunk_size <= 0:
@@ -17,41 +17,49 @@ def create_chunks(
 
     words = text.split()
 
+    if not words:
+        return []
+
     chunks = []
 
     step = chunk_size - overlap
 
-    for i in range(0, len(words), step):
-        chunk_words = words[i:i + chunk_size]
+    for start in range(0, len(words), step):
+        end = start + chunk_size
+        chunk_words = words[start:end]
 
         if not chunk_words:
             break
 
-        chunk = " ".join(chunk_words)
+        chunks.append(
+            {
+                "document_id": document_id,
+                "chunk_id": len(chunks) + 1,
+                "page_number": page_number,
+                "text": " ".join(chunk_words),
+            }
+        )
 
-        chunks.append({
-            "document_id": document_id,
-            "chunk_id": len(chunks) + 1,
-            "page_number": page_number,
-            "text": chunk
-        })
-
-        # Stop once we have reached the end of the document.
-        if i + chunk_size >= len(words):
+        if end >= len(words):
             break
 
     return chunks
 
 
 if __name__ == "__main__":
-    text = "A B C D E F G H I J"
+    text = (
+        "A B C D E F G H I J "
+        "K L M N O P Q R S T "
+        "U V W X Y Z"
+    )
 
     chunks = create_chunks(
         text=text,
-        chunk_size=5,
+        chunk_size=10,
         overlap=2,
         page_number=1,
-        document_id="test-123"
+        document_id="test-123",
     )
+
     for chunk in chunks:
         print(chunk)

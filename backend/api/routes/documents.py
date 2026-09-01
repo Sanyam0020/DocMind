@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
+from pypdf import PdfReader
 
 from backend.schemas.document import DocumentResponse
 from backend.services.ingestion_service import process_document
@@ -24,26 +25,56 @@ async def upload_document(
             detail="Filename is required",
         )
 
-    if not file.filename.lower().endswith(".txt"):
-        raise HTTPException(
-            status_code=400,
-            detail="Only .txt files are supported",
-        )
+    filename = file.filename
+    extension = filename.lower().rsplit(".", 1)[-1]
 
     content = await file.read()
 
-    try:
-        text = content.decode("utf-8")
-    except UnicodeDecodeError:
+    if extension == "txt":
+        try:
+            text = content.decode("utf-8")
+        except UnicodeDecodeError:
+            raise HTTPException(
+                status_code=400,
+                detail="TXT file must be UTF-8 encoded",
+            )
+
+    elif extension == "pdf":
+        try:
+            import io
+
+            reader = PdfReader(io.BytesIO(content))
+
+            pages_text = []
+
+            for page in reader.pages:
+                page_text = page.extract_text() or ""
+                pages_text.append(page_text)
+
+            text = "\n\n".join(pages_text)
+
+        except Exception as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Could not read PDF: {exc}",
+            )
+
+        if not text.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="PDF contains no extractable text",
+            )
+
+    else:
         raise HTTPException(
             status_code=400,
-            detail="File must be UTF-8 encoded",
+            detail="Only .txt and .pdf files are supported",
         )
 
     document = process_document(
-        document_id=file.filename,
-        filename=file.filename,
-        extension=".txt",
+        document_id=filename,
+        filename=filename,
+        extension=f".{extension}",
         size_bytes=len(content),
         text=text,
     )
@@ -53,4 +84,4 @@ async def upload_document(
         filename=document.metadata.filename,
         pages=len(document.pages),
         chunks=len(document.chunks),
-    )   
+    )

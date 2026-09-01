@@ -18,6 +18,7 @@ class RetrievedChunk(BaseModel):
 
 class AnswerResponse(BaseModel):
     received_question: str
+    answer: str
     results: list[RetrievedChunk]
 
 
