@@ -4,38 +4,32 @@ from dotenv import load_dotenv
 from groq import Groq
 
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 class LLMService:
-
     def __init__(self):
         api_key = os.getenv("GROQ_API_KEY")
 
         if not api_key:
-            raise ValueError(
-                "GROQ_API_KEY is not set in the environment."
-            )
+            raise ValueError("GROQ_API_KEY is not set")
 
         self.client = Groq(api_key=api_key)
-
         self.model = "openai/gpt-oss-120b"
 
-    def generate(
-        self,
-        question: str,
-        context: str,
-    ) -> str:
+    def generate(self, question: str, context: str) -> str:
+        if not context.strip():
+            return "I could not find the answer in the provided document."
 
         prompt = f"""
-You are DocuMind, a document question answering assistant.
+You are DocuMind, a document question-answering assistant.
 
-Answer the user's question using only the provided context.
+Answer the user's question using ONLY the provided document context.
 
 If the answer cannot be found in the context, say:
 "I could not find the answer in the provided document."
 
-Context:
+Document context:
 {context}
 
 Question:
