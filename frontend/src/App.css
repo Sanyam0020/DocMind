@@ -1,0 +1,112 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  color: #1f2937;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  margin-top: 12px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+.header {
+  padding: 40px 20px;
+  text-align: center;
+  background: #111827;
+  color: white;
+}
+
+.header h1 {
+  margin: 0 0 8px;
+  font-size: 40px;
+}
+
+.header p {
+  margin: 0;
+  opacity: 0.8;
+}
+
+.container {
+  width: min(900px, 92%);
+  margin: 30px auto;
+}
+
+.card {
+  margin-bottom: 24px;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+input[type='file'] {
+  display: block;
+  margin: 16px 0;
+}
+
+textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.answer {
+  white-space: pre-wrap;
+  line-height: 1.7;
+}
+
+.status {
+  margin-top: 14px;
+  font-weight: 600;
+}
+
+.file-name {
+  margin-top: 14px;
+}
+
+.source {
+  margin-top: 16px;
+  padding: 16px;
+  border-left: 4px solid #6b7280;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.source p {
+  line-height: 1.6;
+}
+
+.score {
+  margin-top: 5px;
+  font-size: 14px;
+  color: #6b7280;
+}
