@@ -1,186 +1,188 @@
 import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import './App.css'
 
 const API_URL = 'http://127.0.0.1:8000'
 
 function App() {
   const [file, setFile] = useState(null)
-  const [uploadStatus, setUploadStatus] = useState('')
+  const [uploadMessage, setUploadMessage] = useState('')
   const [question, setQuestion] = useState('')
   const [answer, setAnswer] = useState('')
   const [results, setResults] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [loadingUpload, setLoadingUpload] = useState(false)
+  const [loadingQuestion, setLoadingQuestion] = useState(false)
+  const [error, setError] = useState('')
 
-  async function uploadDocument() {
+  async function handleUpload() {
     if (!file) {
-      setUploadStatus('Please select a PDF first.')
+      setError('Please select a document first.')
       return
     }
 
-    const formData = new FormData()
-    formData.append('file', file)
-
-    setLoading(true)
-    setUploadStatus('Uploading document...')
+    setError('')
+    setUploadMessage('')
+    setLoadingUpload(true)
 
     try {
-      const response = await fetch(
-        `${API_URL}/documents/upload`,
-        {
-          method: 'POST',
-          body: formData,
-        }
-      )
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch(`${API_URL}/documents/upload`, {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error(`Upload failed with status ${response.status}`)
+      }
 
       const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.detail || 'Upload failed.')
-      }
-
-      setUploadStatus(
+      setUploadMessage(
         `Uploaded ${data.filename} — ${data.chunks} chunks created.`
       )
-    } catch (error) {
-      setUploadStatus(`Error: ${error.message}`)
+    } catch (err) {
+      setError(err.message || 'Failed to upload document.')
     } finally {
-      setLoading(false)
+      setLoadingUpload(false)
     }
   }
 
-  async function askQuestion() {
+  async function handleAsk() {
     if (!question.trim()) {
+      setError('Please enter a question.')
       return
     }
 
-    setLoading(true)
+    setError('')
     setAnswer('')
     setResults([])
+    setLoadingQuestion(true)
 
     try {
-      const response = await fetch(
-        `${API_URL}/ask`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            question: question,
-          }),
-        }
-      )
+      const response = await fetch(`${API_URL}/ask`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question: question.trim(),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Question failed with status ${response.status}`)
+      }
 
       const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.detail || 'Question failed.')
-      }
-
       setAnswer(data.answer)
       setResults(data.results || [])
-    } catch (error) {
-      setAnswer(`Error: ${error.message}`)
+    } catch (err) {
+      setError(err.message || 'Failed to get an answer.')
     } finally {
-      setLoading(false)
+      setLoadingQuestion(false)
     }
   }
 
   return (
-    <div className="app">
+    <main className="app">
       <header className="header">
         <h1>DocuMind</h1>
         <p>Ask questions about your documents using RAG + AI.</p>
       </header>
 
-      <main className="container">
-        <section className="card">
-          <h2>Upload Document</h2>
+      <section className="card">
+        <h2>Upload Document</h2>
 
-          <input
-            type="file"
-            accept=".pdf,.txt"
-            onChange={(event) => setFile(event.target.files[0])}
-          />
+        <input
+          type="file"
+          accept=".pdf,.txt,.docx"
+          onChange={(event) => {
+            setFile(event.target.files[0] || null)
+            setUploadMessage('')
+            setError('')
+          }}
+        />
 
-          <button
-            type="button"
-            onClick={uploadDocument}
-            disabled={loading}
-          >
-            Upload
-          </button>
-
-          {file && (
-            <p className="file-name">
-              Selected: {file.name}
-            </p>
-          )}
-
-          {uploadStatus && (
-            <p className="status">
-              {uploadStatus}
-            </p>
-          )}
-        </section>
-
-        <section className="card">
-          <h2>Ask DocuMind</h2>
-
-          <textarea
-            value={question}
-            onChange={(event) => setQuestion(event.target.value)}
-            placeholder="Ask a question about your document..."
-            rows="4"
-          />
-
-          <button
-            type="button"
-            onClick={askQuestion}
-            disabled={loading}
-          >
-            {loading ? 'Processing...' : 'Ask Question'}
-          </button>
-        </section>
-
-        {answer && (
-          <section className="card">
-            <h2>Answer</h2>
-
-            <div className="answer">
-              {answer}
-            </div>
-          </section>
+        {file && (
+          <p className="selected-file">
+            Selected: <strong>{file.name}</strong>
+          </p>
         )}
 
-        {results.length > 0 && (
-          <section className="card">
-            <h2>Retrieved Sources</h2>
+        <button
+          type="button"
+          onClick={handleUpload}
+          disabled={!file || loadingUpload}
+        >
+          {loadingUpload ? 'Uploading...' : 'Upload'}
+        </button>
 
+        {uploadMessage && (
+          <p className="success">{uploadMessage}</p>
+        )}
+      </section>
+
+      <section className="card">
+        <h2>Ask DocuMind</h2>
+
+        <textarea
+          value={question}
+          onChange={(event) => setQuestion(event.target.value)}
+          placeholder="Ask a question about your document..."
+          rows="4"
+        />
+
+        <button
+          type="button"
+          onClick={handleAsk}
+          disabled={loadingQuestion}
+        >
+          {loadingQuestion ? 'Thinking...' : 'Ask Question'}
+        </button>
+      </section>
+
+      {error && (
+        <section className="card error">
+          <strong>Error:</strong> {error}
+        </section>
+      )}
+
+      {answer && (
+        <section className="card">
+          <h2>Answer</h2>
+
+          <div className="answer">
+            <ReactMarkdown>{answer}</ReactMarkdown>
+          </div>
+        </section>
+      )}
+
+      {results.length > 0 && (
+        <section className="card">
+          <h2>Retrieved Sources</h2>
+
+          <div className="sources">
             {results.map((result) => (
-              <div
-                className="source"
-                key={`${result.chunk_id}-${result.page_number}`}
-              >
-                <div>
-                  <strong>
-                    Chunk {result.chunk_id}
-                  </strong>
-                  {' — '}
-                  Page {result.page_number}
+              <article className="source" key={result.chunk_id}>
+                <div className="source-header">
+                  <strong>Chunk {result.chunk_id}</strong>
+                  <span>Page {result.page_number}</span>
                 </div>
 
-                <div className="score">
+                <p className="score">
                   Score: {result.score.toFixed(3)}
-                </div>
+                </p>
 
                 <p>{result.text}</p>
-              </div>
+              </article>
             ))}
-          </section>
-        )}
-      </main>
-    </div>
+          </div>
+        </section>
+      )}
+    </main>
   )
 }
 
