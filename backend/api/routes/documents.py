@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
+# pyrefly: ignore [missing-import]
 from pypdf import PdfReader
 
 from backend.schemas.document import DocumentResponse

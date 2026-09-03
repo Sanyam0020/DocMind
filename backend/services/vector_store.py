@@ -11,7 +11,29 @@ class VectorStore:
         self.dimension = dimension
         self.index = faiss.IndexFlatIP(dimension)
         self.chunks: list[Chunk] = []
+            
+    def remove_document(self, document_id: str):
+        """Remove all chunks belonging to a document."""
+        remaining_chunks = [
+            chunk
+            for chunk in self.chunks
+            if chunk.document_id != document_id
+        ]
 
+        if len(remaining_chunks) == len(self.chunks):
+            return
+
+        self.index = faiss.IndexFlatIP(self.dimension)
+
+        if remaining_chunks:
+            embeddings = np.asarray(
+                [chunk.embedding for chunk in remaining_chunks],
+                dtype="float32",
+            )
+            self.index.add(embeddings)
+
+        self.chunks = remaining_chunks
+        
     def add(
         self,
         chunks: list[Chunk],

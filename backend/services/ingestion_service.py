@@ -72,6 +72,7 @@ def process_document(
             )
         )
 
+    vector_store.remove_document(document_id)
     vector_store.add(chunk_objects)
 
     return Document(
