@@ -40,7 +40,7 @@ function App() {
       const data = await response.json()
 
       setUploadMessage(
-        `Uploaded ${data.filename} — ${data.chunks} chunks created.`
+        `Uploaded ${data.filename} — ${data.chunks} chunks created.`,
       )
     } catch (err) {
       setError(err.message || 'Failed to upload document.')
@@ -86,103 +86,337 @@ function App() {
     }
   }
 
+  function handleKeyDown(event) {
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+      handleAsk()
+    }
+  }
+
   return (
-    <main className="app">
-      <header className="header">
-        <h1>DocuMind</h1>
-        <p>Ask questions about your documents using RAG + AI.</p>
-      </header>
+    <div className="app-shell">
 
-      <section className="card">
-        <h2>Upload Document</h2>
+      {/* Background */}
+      <div className="background-glow glow-one" />
+      <div className="background-glow glow-two" />
 
-        <input
-          type="file"
-          accept=".pdf,.txt,.docx"
-          onChange={(event) => {
-            setFile(event.target.files[0] || null)
-            setUploadMessage('')
-            setError('')
-          }}
-        />
+      {/* Navigation */}
+      <nav className="navbar">
+        <div className="brand">
+          <div className="brand-mark">
+            D
+          </div>
 
-        {file && (
-          <p className="selected-file">
-            Selected: <strong>{file.name}</strong>
+          <span>DocuMind</span>
+        </div>
+
+        <div className="nav-status">
+          <span className="status-dot" />
+          RAG Online
+        </div>
+      </nav>
+
+      <main className="app-container">
+
+        {/* Hero */}
+        <header className="hero">
+          <div className="hero-label">
+            DOCUMENT INTELLIGENCE
+          </div>
+
+          <h1>
+            Understand your
+            <span> documents.</span>
+          </h1>
+
+          <p>
+            Upload a document, ask a question, and let DocuMind
+            find the answer using retrieval-augmented generation.
           </p>
-        )}
+        </header>
 
-        <button
-          type="button"
-          onClick={handleUpload}
-          disabled={!file || loadingUpload}
-        >
-          {loadingUpload ? 'Uploading...' : 'Upload'}
-        </button>
+        {/* Upload */}
+        <section className="card upload-card">
 
-        {uploadMessage && (
-          <p className="success">{uploadMessage}</p>
-        )}
-      </section>
+          <div className="card-header">
+            <div>
+              <span className="eyebrow">01 · KNOWLEDGE BASE</span>
+              <h2>Add a document</h2>
+              <p>
+                Upload a PDF, TXT, or DOCX file to begin.
+              </p>
+            </div>
 
-      <section className="card">
-        <h2>Ask DocuMind</h2>
+            <div className="header-icon">
+              +
+            </div>
+          </div>
 
-        <textarea
-          value={question}
-          onChange={(event) => setQuestion(event.target.value)}
-          placeholder="Ask a question about your document..."
-          rows="4"
-        />
+          <label className={`drop-zone ${file ? 'has-file' : ''}`}>
 
-        <button
-          type="button"
-          onClick={handleAsk}
-          disabled={loadingQuestion}
-        >
-          {loadingQuestion ? 'Thinking...' : 'Ask Question'}
-        </button>
-      </section>
+            <input
+              type="file"
+              accept=".pdf,.txt,.docx"
+              onChange={(event) => {
+                setFile(event.target.files[0] || null)
+                setUploadMessage('')
+                setError('')
+              }}
+            />
 
-      {error && (
-        <section className="card error">
-          <strong>Error:</strong> {error}
+            <div className="upload-symbol">
+              ↑
+            </div>
+
+            <div className="drop-content">
+              <strong>
+                {file ? file.name : 'Choose a document'}
+              </strong>
+
+              <span>
+                {file
+                  ? 'Ready to be processed'
+                  : 'or drag and drop your file here'}
+              </span>
+            </div>
+
+            <span className="file-types">
+              PDF · TXT · DOCX
+            </span>
+          </label>
+
+          {file && (
+            <div className="selected-file">
+
+              <div className="file-icon">
+                {file.name.toLowerCase().endsWith('.pdf')
+                  ? 'PDF'
+                  : 'FILE'}
+              </div>
+
+              <div className="file-details">
+                <span>Selected document</span>
+                <strong>{file.name}</strong>
+              </div>
+
+              <button
+                className="remove-file"
+                type="button"
+                onClick={() => {
+                  setFile(null)
+                  setUploadMessage('')
+                }}
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          <button
+            className="primary-button"
+            type="button"
+            onClick={handleUpload}
+            disabled={!file || loadingUpload}
+          >
+            {loadingUpload ? (
+              <>
+                <span className="spinner" />
+                Processing document...
+              </>
+            ) : (
+              <>
+                Upload & Process
+                <span>→</span>
+              </>
+            )}
+          </button>
+
+          {uploadMessage && (
+            <div className="success-message">
+              <span className="message-icon">✓</span>
+              <span>{uploadMessage}</span>
+            </div>
+          )}
         </section>
-      )}
 
-      {answer && (
-        <section className="card">
-          <h2>Answer</h2>
+        {/* Ask */}
+        <section className="card ask-card">
 
-          <div className="answer">
-            <ReactMarkdown>{answer}</ReactMarkdown>
+          <div className="card-header">
+            <div>
+              <span className="eyebrow">02 · ASK YOUR DOCUMENT</span>
+              <h2>What would you like to know?</h2>
+              <p>
+                Ask questions naturally. DocuMind retrieves the
+                most relevant parts of your document.
+              </p>
+            </div>
+
+            <div className="header-icon">
+              ?
+            </div>
+          </div>
+
+          <div className="question-box">
+
+            <textarea
+              value={question}
+              onChange={(event) => setQuestion(event.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask anything about your document..."
+              rows={5}
+            />
+
+            <div className="question-footer">
+
+              <span className="character-count">
+                {question.length > 0
+                  ? `${question.length} characters`
+                  : 'Ctrl + Enter to submit'}
+              </span>
+
+              <button
+                className="ask-button"
+                type="button"
+                onClick={handleAsk}
+                disabled={loadingQuestion}
+              >
+                {loadingQuestion ? (
+                  <>
+                    <span className="spinner" />
+                    Thinking...
+                  </>
+                ) : (
+                  <>
+                    Ask Question
+                    <span>→</span>
+                  </>
+                )}
+              </button>
+
+            </div>
           </div>
         </section>
-      )}
 
-      {results.length > 0 && (
-        <section className="card">
-          <h2>Retrieved Sources</h2>
+        {/* Error */}
+        {error && (
+          <section className="message-card error-message">
+            <span className="message-icon">!</span>
 
-          <div className="sources">
-            {results.map((result) => (
-              <article className="source" key={result.chunk_id}>
-                <div className="source-header">
-                  <strong>Chunk {result.chunk_id}</strong>
-                  <span>Page {result.page_number}</span>
-                </div>
+            <div>
+              <strong>Something went wrong</strong>
+              <p>{error}</p>
+            </div>
+          </section>
+        )}
 
-                <p className="score">
-                  Score: {result.score.toFixed(3)}
-                </p>
+        {/* Answer */}
+        {answer && (
+          <section className="card answer-card">
 
-                <p>{result.text}</p>
-              </article>
-            ))}
+            <div className="result-header">
+
+              <div>
+                <span className="eyebrow">03 · GENERATED RESPONSE</span>
+                <h2>Answer</h2>
+              </div>
+
+              <div className="ai-badge">
+                <span className="status-dot" />
+                AI
+              </div>
+
+            </div>
+
+            <div className="answer-content">
+              <ReactMarkdown>
+                {answer}
+              </ReactMarkdown>
+            </div>
+
+          </section>
+        )}
+
+        {/* Sources */}
+        {results.length > 0 && (
+          <section className="card sources-card">
+
+            <div className="result-header">
+
+              <div>
+                <span className="eyebrow">04 · RAG RETRIEVAL</span>
+                <h2>Retrieved sources</h2>
+              </div>
+
+              <span className="source-count">
+                {results.length} sources
+              </span>
+
+            </div>
+
+            <div className="sources">
+
+              {results.map((result, index) => (
+                <article
+                  className="source"
+                  key={result.chunk_id ?? index}
+                >
+
+                  <div className="source-top">
+
+                    <div className="source-number">
+                      {String(index + 1).padStart(2, '0')}
+                    </div>
+
+                    <div className="source-meta">
+                      <strong>
+                        Chunk {result.chunk_id}
+                      </strong>
+
+                      <span>
+                        Page {result.page_number}
+                      </span>
+                    </div>
+
+                    <div className="score">
+                      {(result.score * 100).toFixed(1)}%
+                      <small>match</small>
+                    </div>
+
+                  </div>
+
+                  <p>
+                    {result.text}
+                  </p>
+
+                </article>
+              ))}
+
+            </div>
+          </section>
+        )}
+
+        {/* Footer */}
+        <footer className="footer">
+          <div className="footer-brand">
+            <span className="footer-mark">D</span>
+            DocuMind
           </div>
-        </section>
-      )}
-    </main>
+
+          <span>
+            Retrieval-Augmented Generation
+          </span>
+
+          <span>
+            •
+          </span>
+
+          <span>
+            Vector Search
+          </span>
+        </footer>
+
+      </main>
+    </div>
   )
 }
 
