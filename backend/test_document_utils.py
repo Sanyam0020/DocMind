@@ -1,8 +1,10 @@
-from document_utils import count_words
+from backend.document_utils import count_words
 
 
-text = "DocuMind is a document question answering system."
+def test_count_words():
 
-result = count_words(text)
+    text = "DocuMind is a document question answering system."
 
-print(result)
+    result = count_words(text)
+
+    assert result == 7
